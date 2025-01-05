@@ -8,15 +8,16 @@ class DHParameters:
         self.robot_name = robot_name
         # self.create_DH_parameters()
 
-    def create_DH_parameters(self, joints: list):
+    def create_DH_parameters(self, joints: list, degrees=True):
         """
         Creates the DH parameters for the robot
         units: meters and radians
         """
-        joints = list(map(np.deg2rad, joints))
+        if degrees:
+            joints = list(map(np.deg2rad, joints))
         if len(joints) < 7:
             joints = joints + [0] * (7 - len(joints))
-        print(f"joints: {joints}")
+        print(f"Applied joints: {joints}")
         # joints = joints
         # modified DH parameters [a, alpha, d, theta]
         DH = {
@@ -237,6 +238,62 @@ class DHParameters:
                     ]
                 ),
             },
+            "Yaskawa Motoman HC10": {
+                "type": "modified",
+                "resource": "https://github.com/SaltworkerMLU/RobotKinematicsCatalogue/blob/ea88ef98a3239e9f2191d147c94210d1b84a126d/robotkinematicscatalogue/inversekinematics/__6DOF/__industrialRobots/Yaskawa_HC10.py#L4",
+                "DH": np.matrix(
+                    [
+                        [0, 0, 0, joints[0]],
+                        [0, -np.pi / 2, 0, -np.pi / 2 + joints[1]],
+                        [700 / 1000.0, 0, 0, np.pi / 2 - joints[2]],
+                        [0, -np.pi / 2, 500 / 1000.0, -joints[3]],
+                        [0, np.pi / 2, 162 / 1000.0, -joints[4]],
+                        [0, -np.pi / 2, 130 / 1000.0, np.pi - joints[5]],
+                    ]
+                ),
+            },
+            "Elite Robots EC66": {
+                "type": "modified",
+                "resource": "https://github.com/SaltworkerMLU/RobotKinematicsCatalogue/blob/ea88ef98a3239e9f2191d147c94210d1b84a126d/robotkinematicscatalogue/inversekinematics/__6DOF/__collaborativeRobots/Elite_Robots_EC66.py#L7",
+                "DH": np.matrix(
+                    [
+                        [0, 0, 96 / 1000.0, np.pi + joints[0]],
+                        [0, np.pi / 2, 0, np.pi + joints[1]],
+                        [418 / 1000.0, 0, 0, 0 + joints[2]],
+                        [398 / 1000.0, 0, 122 / 1000.0, 0 + joints[3]],
+                        [0, -np.pi / 2, 98 / 1000.0, np.pi + joints[4]],
+                        [0, np.pi / 2, 89 / 1000.0, np.pi + joints[5]],
+                    ]
+                ),
+            },
+            "Elite Robots EC63": {
+                "type": "modified",
+                "resource": "https://github.com/SaltworkerMLU/RobotKinematicsCatalogue/blob/ea88ef98a3239e9f2191d147c94210d1b84a126d/robotkinematicscatalogue/inversekinematics/__6DOF/__collaborativeRobots/Elite_Robots_EC63.py#L3",
+                "DH": np.matrix(
+                    [
+                        [0, 0, 140 / 1000.0, np.pi + joints[0]],
+                        [0, np.pi / 2, 0, np.pi + joints[1]],
+                        [270 / 1000.0, 0, 0, joints[2]],
+                        [256 / 1000.0, 0, 103.5 / 1000.0, joints[3]],
+                        [0, -np.pi / 2, 98 / 1000.0, np.pi + joints[4]],
+                        [0, np.pi / 2, 89 / 1000.0, np.pi + joints[5]],
+                    ]
+                ),
+            },
+            "Elite Robots CS66": {
+                "type": "modified",
+                "resource": "https://github.com/SaltworkerMLU/RobotKinematicsCatalogue/blob/ea88ef9/robotkinematicscatalogue/inversekinematics/__6DOF/__collaborativeRobots/Elite_Robots_CS66.py",
+                "DH": np.matrix(
+                    [
+                        [0, 0, 162.5 / 1000.0, 0 + joints[0]],
+                        [0, np.pi / 2, 0, np.pi + joints[1]],
+                        [427 / 1000.0, 0, 0, joints[2]],
+                        [390.5 / 1000.0, 0, 147.5 / 1000.0, joints[3]],
+                        [0, -np.pi / 2, 96.5 / 1000.0, joints[4]],
+                        [0, np.pi / 2, 92 / 1000.0, np.pi + joints[5]],
+                    ]
+                ),
+            },
         }
         return DH
 
@@ -277,14 +334,13 @@ class DHParameters:
         else:
             raise ValueError("Invalid type")
 
-    def get_transformations(self, joint_angles: list):
-        DH = self.create_DH_parameters(joint_angles)
+    def get_transformations(self, joint_angles: list, degrees=True):
+        DH = self.create_DH_parameters(joint_angles, degrees)
         assert self.robot_name in DH.keys(), "Robot not found in DH parameters"
 
+        print(f"{len(DH)} DH parameters found")
         DH_params = DH[self.robot_name]["DH"]
         DH_type = DH[self.robot_name]["type"]
-        # print(DH_params)
-        # exit()
 
         T_total = np.identity(4)
 
