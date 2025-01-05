@@ -8,16 +8,16 @@ class DHParameters:
         self.robot_name = robot_name
         # self.create_DH_parameters()
 
-    def create_DH_parameters(self, joints: list, degrees=True):
+    def create_DH_parameters(self, joints: list, degree=True):
         """
         Creates the DH parameters for the robot
         units: meters and radians
         """
-        if degrees:
+        if degree:
             joints = list(map(np.deg2rad, joints))
         if len(joints) < 7:
             joints = joints + [0] * (7 - len(joints))
-        print(f"Applied joints: {joints}")
+        # print(f"Applied joints: {joints}")
         # joints = joints
         # modified DH parameters [a, alpha, d, theta]
         DH = {
@@ -334,11 +334,11 @@ class DHParameters:
         else:
             raise ValueError("Invalid type")
 
-    def get_transformations(self, joint_angles: list, degrees=True):
-        DH = self.create_DH_parameters(joint_angles, degrees)
+    def get_transformations(self, joint_angles: list, degree=True):
+        DH = self.create_DH_parameters(joint_angles, degree)
         assert self.robot_name in DH.keys(), "Robot not found in DH parameters"
 
-        print(f"{len(DH)} DH parameters found")
+        # print(f"{len(DH)} DH parameters found")
         DH_params = DH[self.robot_name]["DH"]
         DH_type = DH[self.robot_name]["type"]
 
@@ -350,7 +350,7 @@ class DHParameters:
             T_total = np.dot(T_total, T_i)
             # print(f"{i}# {T_total}")
         # print(T_total)
-        return T_total
+        return T_total.reshape(4, 4)
 
     def matrix2RXYZ(self, matrix):
         r = R.from_matrix(matrix[:3, :3])
