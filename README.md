@@ -11,7 +11,7 @@ The supported robot arms can be found in the `DHParametersRobotArm` class.
 import DHParameters as dh
 
 dh = dh.DHParameters("Universe Robot 5e")
-res = dh.get_transformations([0, 0, 20, 8, 100, 0], degrees=True)
+res = dh.get_transformations([0, 0, 20, 8, 100, 0], degree=True)
 r, beta, alpha = dh.matrix2RXYZ(res)
 print(f"Transformation matrix:\n{np.array2string(res, separator=', ')}")
 Tx, Ty, Tz = dh.matrix2TXYZ(res)

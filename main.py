@@ -5,8 +5,8 @@ np.set_printoptions(suppress=True, precision=6)
 
 if __name__ == "__main__":
     # robot_name = "Universe Robot 3e"
-    robot_name = "Universe Robot 5e"
-    # robot_name = "Universe Robot 10e"
+    # robot_name = "Universe Robot 5e"
+    robot_name = "Universe Robot 10e"
     # robot_name = "Franka Franka 3"
     # robot_name = "Kinova Gen3"
     # robot_name = "KUKA iiwa 7"
@@ -23,20 +23,15 @@ if __name__ == "__main__":
     # robot_name = "Elite Robots CS66"
     # robot_name = "Elite Robots EC63"
     dh = dh.DHParameters(robot_name)
-    # res = dh.get_transformations([0, 0, 30, 0, 0, 0, 0])
-    res = dh.get_transformations([0, 0, 20, 8, 100, 0])
     # res = dh.get_transformations(
-    #     [
-    #         8.076545179602742e-07,
-    #         4.644371924689443e-09,
-    #         2.967058895272128,
-    #         2.0943951572957644,
-    #         0.14128910496295283,
-    #         -1.535889631942559,
-    #         2.4989871387840483,
-    #     ],
-    #     degrees=False,
+    #     [6.133670287371008e-09, -2.653556322323241e-09, -1.0753982325693274, -6.28318507592011, 1.8523757511217531, -2.5132826102253696],
+    #     degree=False,
     # )
+    # res = dh.get_transformations([0, -90, -90, 0, 90, 0])
+    res = dh.get_transformations(
+        [0.000021,-1.570825,-1.411322,-2.670274,1.731576,0.768732],
+        degree=False,
+    )
     r, beta, alpha = dh.matrix2RXYZ(res)
     print(f"Transformation matrix:\n{np.array2string(res, separator=', ')}")
     Tx, Ty, Tz = dh.matrix2TXYZ(res)

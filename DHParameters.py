@@ -8,16 +8,19 @@ class DHParameters:
         self.robot_name = robot_name
         # self.create_DH_parameters()
 
-    def create_DH_parameters(self, joints: list, degree=True):
+    def create_DH_parameters(self, joints: list, degree):
         """
         Creates the DH parameters for the robot
         units: meters and radians
         """
         if degree:
             joints = list(map(np.deg2rad, joints))
-        if len(joints) < 7:
+        else:
+            print([np.round(v) for v in list(map(np.rad2deg, joints))])
+            pass
+        if len(joints) < 7:  # if the number of joints is less than 7, fill the rest with zeros
             joints = joints + [0] * (7 - len(joints))
-        # print(f"Applied joints: {joints}")
+        print(f"Applied joints: {joints}")
         # joints = joints
         # modified DH parameters [a, alpha, d, theta]
         DH = {
