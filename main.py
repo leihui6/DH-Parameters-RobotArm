@@ -6,7 +6,7 @@ np.set_printoptions(suppress=True, precision=6)
 if __name__ == "__main__":
     # robot_name = "Universe Robot 3e"
     # robot_name = "Universe Robot 5e"
-    robot_name = "Universe Robot 10e"
+    # robot_name = "Universe Robot 10e"
     # robot_name = "Franka Franka 3"
     # robot_name = "Kinova Gen3"
     # robot_name = "KUKA iiwa 7"
@@ -22,16 +22,12 @@ if __name__ == "__main__":
     # robot_name = "Elite Robots EC66"
     # robot_name = "Elite Robots CS66"
     # robot_name = "Elite Robots EC63"
+    robot_name = "GCR10-1300"
     dh = dh.DHParameters(robot_name)
-    # res = dh.get_transformations(
-    #     [6.133670287371008e-09, -2.653556322323241e-09, -1.0753982325693274, -6.28318507592011, 1.8523757511217531, -2.5132826102253696],
-    #     degree=False,
-    # )
-    # res = dh.get_transformations([0, -90, -90, 0, 90, 0])
-    res = dh.get_transformations(
-        [0.000021,-1.570825,-1.411322,-2.670274,1.731576,0.768732],
-        degree=False,
-    )
+    dh.readCalibrationFile("KinematicCalibration.json")
+    # res = dh.get_transformations([0, 0, 90, 0, 0, 0], degree=False)
+    # res = dh.get_transformations([0, -40.46, 92.28, 25.92, 46.66, 0], degree=True)
+    res = dh.get_transformations([36.83, -29.51, 105.24, 62.21, 91.37, 42.12], degree=True)
     r, beta, alpha = dh.matrix2RXYZ(res)
     print(f"Transformation matrix:\n{np.array2string(res, separator=', ')}")
     Tx, Ty, Tz = dh.matrix2TXYZ(res)

@@ -1,3 +1,4 @@
+import json
 import numpy as np
 from numpy.linalg import inv
 from scipy.spatial.transform import Rotation as R
@@ -6,6 +7,9 @@ from scipy.spatial.transform import Rotation as R
 class DHParameters:
     def __init__(self, robot_name: str):
         self.robot_name = robot_name
+        self.DH = None
+        self.DHOffsets = None
+        self.JointBias = None
         # self.create_DH_parameters()
 
     def create_DH_parameters(self, joints: list, degree):
@@ -18,11 +22,12 @@ class DHParameters:
         else:
             print([np.round(v) for v in list(map(np.rad2deg, joints))])
             pass
-        if (
-            len(joints) < 7
-        ):  # if the number of joints is less than 7, fill the rest with zeros
+        if len(joints) < 7:  # if the number of joints is less than 7, fill the rest with zeros
             joints = joints + [0] * (7 - len(joints))
         print(f"Applied joints: {joints}")
+        # set self.JointBias to 0 if None
+        if self.JointBias is None:
+            self.JointBias = [0] * len(joints)
         # joints = joints
         # modified DH parameters [a, alpha, d, theta]
         DH = {
@@ -364,12 +369,25 @@ class DHParameters:
             raise ValueError("Invalid type")
 
     def get_transformations(self, joint_angles: list, degree=True):
-        DH = self.create_DH_parameters(joint_angles, degree)
-        assert self.robot_name in DH.keys(), "Robot not found in DH parameters"
+        # if not degree:
+        #     joint_angles = np.deg2rad(joint_angles)
+        # if self.JointBias is not None:
+        #     joint_angles = joint_angles + self.JointBias
+
+        self.DH = self.create_DH_parameters(joint_angles, degree)
+        assert self.robot_name in self.DH.keys(), "Robot not found in DH parameters"
+
+        if self.DHOffsets is not None:
+            print("Applying calibration offsets to DH parameters")
+            for i in range(self.DHOffsets.shape[0]):
+                self.DH[self.robot_name]["DH"][i, 0] += self.DHOffsets[i, 0]
+                self.DH[self.robot_name]["DH"][i, 1] += self.DHOffsets[i, 1]
+                self.DH[self.robot_name]["DH"][i, 2] += self.DHOffsets[i, 2]
+                self.DH[self.robot_name]["DH"][i, 3] += self.DHOffsets[i, 3]
 
         # print(f"{len(DH)} DH parameters found")
-        DH_params = DH[self.robot_name]["DH"]
-        DH_type = DH[self.robot_name]["type"]
+        DH_params = self.DH[self.robot_name]["DH"]
+        DH_type = self.DH[self.robot_name]["type"]
 
         T_total = np.identity(4)
 
@@ -388,3 +406,35 @@ class DHParameters:
     def matrix2TXYZ(self, matrix):
         Tx, Ty, Tz = matrix[:3, 3] * 1000
         return Tx, Ty, Tz
+
+    def readCalibrationFile(self, filename):
+        with open(filename, "r") as f:
+            data = json.load(f)
+
+        calibration_json = json.loads("[]")
+        if "GCR" in self.robot_name:
+            calibration_json = data["links_kinematic_calibration"]
+
+        self.processCalibrationData(calibration_json)
+
+    def processCalibrationData(self, calibration_data):
+        for offset in calibration_data:
+            delta_a, delta_alpha, delta_d, delta_theta = offset["delta_dh"]
+            if self.DHOffsets is None:
+                self.DHOffsets = []
+            if self.JointBias is None:
+                self.JointBias = []
+            pos_bias = offset["pos_bias"]
+            self.DHOffsets.append(
+                [
+                    delta_a,
+                    delta_alpha,
+                    delta_d,
+                    delta_theta #+ d_offset
+                ]
+            )
+            self.JointBias.append(pos_bias)
+        self.DHOffsets = np.array(self.DHOffsets).reshape(-1, 4)
+        self.JointBias = np.array(self.JointBias)
+
+
