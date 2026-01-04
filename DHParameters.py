@@ -18,7 +18,9 @@ class DHParameters:
         else:
             print([np.round(v) for v in list(map(np.rad2deg, joints))])
             pass
-        if len(joints) < 7:  # if the number of joints is less than 7, fill the rest with zeros
+        if (
+            len(joints) < 7
+        ):  # if the number of joints is less than 7, fill the rest with zeros
             joints = joints + [0] * (7 - len(joints))
         print(f"Applied joints: {joints}")
         # joints = joints
@@ -297,6 +299,20 @@ class DHParameters:
                     ]
                 ),
             },
+            "GCR10-1300": {
+                "type": "modified",
+                "resource": "https://github.com/SaltworkerMLU/RobotKinematicsCatalogue/blob/ea88ef98a3239e9f2191d147c94210d1b84a126d/robotkinematicscatalogue/inversekinematics/__6DOF/__collaborativeRobots/Siasun_GCR10_1300.py#L4",
+                "DH": np.matrix(
+                    [
+                        [0, 0, 165 / 1000, np.pi + joints[0]],
+                        [0, np.pi / 2, 0, np.pi / 2 + joints[1]],
+                        [608 / 1000, 0, 0, 0 + joints[2]],
+                        [566 / 1000, 0, 164 / 1000, -np.pi / 2 + joints[3]],
+                        [0, -np.pi / 2, 126 / 1000, 0 + joints[4]],
+                        [0, np.pi / 2, 113 / 1000, np.pi + joints[5]],
+                    ]
+                ),
+            },
         }
         return DH
 
@@ -328,8 +344,18 @@ class DHParameters:
             alpha, a, d, theta = data
             return np.array(
                 [
-                    [np.cos(theta), -np.cos(alpha) * np.sin(theta), np.sin(alpha) * np.sin(theta), a * np.cos(theta)],
-                    [np.sin(theta), np.cos(alpha) * np.cos(theta), -np.sin(alpha) * np.cos(theta), a * np.sin(theta)],
+                    [
+                        np.cos(theta),
+                        -np.cos(alpha) * np.sin(theta),
+                        np.sin(alpha) * np.sin(theta),
+                        a * np.cos(theta),
+                    ],
+                    [
+                        np.sin(theta),
+                        np.cos(alpha) * np.cos(theta),
+                        -np.sin(alpha) * np.cos(theta),
+                        a * np.sin(theta),
+                    ],
                     [0, np.sin(alpha), np.cos(alpha), d],
                     [0, 0, 0, 1],
                 ]
