@@ -21,7 +21,6 @@ class DHParameters:
             joints = list(map(np.deg2rad, joints))
         else:
             print([np.round(v) for v in list(map(np.rad2deg, joints))])
-            pass
         if len(joints) < 7:  # if the number of joints is less than 7, fill the rest with zeros
             joints = joints + [0] * (7 - len(joints))
         print(f"Applied joints: {joints}")
@@ -369,12 +368,15 @@ class DHParameters:
             raise ValueError("Invalid type")
 
     def get_transformations(self, joint_angles: list, degree=True):
-        # if not degree:
-        #     joint_angles = np.deg2rad(joint_angles)
+        # if degree:
+        # joint_angles = list(map(np.deg2rad, joint_angles))
+        # radians
+        # print(np.array(self.JointBias))
         # if self.JointBias is not None:
-        #     joint_angles = joint_angles + self.JointBias
-
-        self.DH = self.create_DH_parameters(joint_angles, degree)
+        joint_angles = np.array(joint_angles) + np.array(self.JointBias)
+        joint_angles = joint_angles.tolist()
+        # all angles in radians
+        self.DH = self.create_DH_parameters(joint_angles, degree=True)
         assert self.robot_name in self.DH.keys(), "Robot not found in DH parameters"
 
         if self.DHOffsets is not None:
@@ -435,6 +437,9 @@ class DHParameters:
             )
             self.JointBias.append(pos_bias)
         self.DHOffsets = np.array(self.DHOffsets).reshape(-1, 4)
-        self.JointBias = np.array(self.JointBias)
+        # self.JointBias = np.array(self.JointBias)
+        # degree to rad
+        self.JointBias = list(map(np.deg2rad, self.JointBias))
+        self.JointBias = np.array(self.JointBias).reshape(-1)
 
 
