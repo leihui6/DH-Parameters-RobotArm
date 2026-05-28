@@ -1,4 +1,4 @@
-import DHParameters as dh
+import DHParameters as dh_module
 import numpy as np
 
 np.set_printoptions(suppress=True, precision=6)
@@ -22,12 +22,15 @@ if __name__ == "__main__":
     # robot_name = "Elite Robots EC66"
     # robot_name = "Elite Robots CS66"
     # robot_name = "Elite Robots EC63"
-    robot_name = "GCR10-1300"
-    dh = dh.DHParameters(robot_name)
-    dh.readCalibrationFile("KinematicCalibration.json")
+    # robot_name = "GCR10-1300"
+    robot_name = "DUCO GRC7"
+    dh = dh_module.DHParameters(robot_name)
+    # dh.readCalibrationFile("KinematicCalibration.json")
     # res = dh.get_transformations([0, 0, 90, 0, 0, 0], degree=False)
     # res = dh.get_transformations([0, -40.46, 92.28, 25.92, 46.66, 0], degree=True)
-    res = dh.get_transformations([36.83, -29.51, 105.24, 62.21, 91.37, 42.12], degree=True)
+    # res = dh.get_transformations([36.83, -29.51, 105.24, 62.21, 91.37, 42.12], degree=True)
+    # res = dh.get_transformations([-43.98, 3.39, -44.52, -57.51,76.54,141.61], degree=True)
+    res = dh.get_transformations([111.7,-27.51,-90.50,-18.50,42.31,155.71], degree=True)
     r, beta, alpha = dh.matrix2RXYZ(res)
     print(f"Transformation matrix:\n{np.array2string(res, separator=', ')}")
     Tx, Ty, Tz = dh.matrix2TXYZ(res)

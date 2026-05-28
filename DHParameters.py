@@ -317,6 +317,20 @@ class DHParameters:
                     ]
                 ),
             },
+            "DUCO GRC7": {
+            "type": "modified",
+            "resource": "",
+            "DH": np.matrix(
+                [
+                    [0, 0, 0.122, 0 + joints[0]],
+                    [0, -np.pi / 2, 0.1405, -np.pi / 2 + joints[1]],
+                    [0.425, 0, 0, 0 + joints[2]],
+                    [0.392, 0, 0, np.pi / 2 + joints[3]],
+                    [0, np.pi / 2, 0.1, 0 + joints[4]],
+                    [0, -np.pi / 2, 0.105, 0 + joints[5]],
+                ]
+            ),
+            }
         }
         return DH
 
@@ -373,11 +387,16 @@ class DHParameters:
         # radians
         # print(np.array(self.JointBias))
         # if self.JointBias is not None:
-        joint_angles = np.array(joint_angles) + np.array(self.JointBias)
+        if self.JointBias is not None:
+            joint_angles = np.array(joint_angles) + np.array(self.JointBias)
+        else:
+            joint_angles = np.array(joint_angles)
         joint_angles = joint_angles.tolist()
         # all angles in radians
         self.DH = self.create_DH_parameters(joint_angles, degree=True)
         assert self.robot_name in self.DH.keys(), "Robot not found in DH parameters"
+
+        print (self.DH[self.robot_name]["DH"])
 
         if self.DHOffsets is not None:
             print("Applying calibration offsets to DH parameters")
@@ -397,6 +416,10 @@ class DHParameters:
             data = DH_params[i, 0], DH_params[i, 1], DH_params[i, 2], DH_params[i, 3]
             T_i = self.calculate_matrix(DH_type, data)
             T_total = np.dot(T_total, T_i)
+            print (f"Link {i+1} transformation matrix:")
+            print (data)
+            print (T_i)
+            # exit()
             # print(f"{i}# {T_total}")
         # print(T_total)
         return T_total.reshape(4, 4)
@@ -413,13 +436,16 @@ class DHParameters:
         with open(filename, "r") as f:
             data = json.load(f)
 
-        calibration_json = json.loads("[]")
-        if "GCR" in self.robot_name:
-            calibration_json = data["links_kinematic_calibration"]
+        calibration_json = data.get("links_kinematic_calibration", [])
 
         self.processCalibrationData(calibration_json)
 
     def processCalibrationData(self, calibration_data):
+        if not calibration_data:
+            self.DHOffsets = None
+            self.JointBias = None
+            return
+
         for offset in calibration_data:
             delta_a, delta_alpha, delta_d, delta_theta = offset["delta_dh"]
             if self.DHOffsets is None:
